@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -20,13 +20,21 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libkrb5-dev libsecret-1-dev libx11-dev libxkbfile-dev
+
       - name: Install root dependencies
+        env:
+          npm_config_ignore_scripts: 'true'
         run: npm install --ignore-scripts
 
       - name: Install build sub-dependencies
         env:
           VSCODE_SKIP_PREINSTALL: '1'
           CI: 'true'
+          npm_config_ignore_scripts: 'true'
         run: node build/npm/postinstall.js
 
       - name: Build Linux Package

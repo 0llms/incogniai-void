@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout repository
@@ -30,6 +30,7 @@ jobs:
         env:
           VSCODE_SKIP_PREINSTALL: '1'
           CI: 'true'
+          npm_config_ignore_scripts: 'true'
         run: npm install --ignore-scripts
 
       - name: Install build sub-dependencies
@@ -37,6 +38,9 @@ jobs:
         env:
           VSCODE_SKIP_PREINSTALL: '1'
           CI: 'true'
+          npm_config_ignore_scripts: 'true'
+          GYP_MSVS_VERSION: '2022'
+          npm_config_msvs_version: '2022'
         run: node build/npm/postinstall.js
 
       - name: Build Windows package
@@ -45,6 +49,8 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
           VSCODE_SKIP_PREINSTALL: '1'
           CI: 'true'
+          GYP_MSVS_VERSION: '2022'
+          npm_config_msvs_version: '2022'
         run: npx gulp vscode-win32-x64-min
 
       - name: Zip the output
