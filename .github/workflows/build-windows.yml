@@ -25,13 +25,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Configure node-gyp to use VS 2022
-        shell: powershell
-        run: |
-          # windows-latest has VS 2022 - tell node-gyp to use it
-          $env:npm_config_msvs_version = "2022"
-          node -e "const gyp = require('node-gyp'); console.log('node-gyp ok')"
-
       - name: Install dependencies (skip native builds)
         shell: cmd
         run: npm install --ignore-scripts
@@ -40,7 +33,6 @@ jobs:
         shell: cmd
         env:
           GYP_MSVS_VERSION: '2022'
-          npm_config_msvs_version: '2022'
         run: npm rebuild --msvs_version=2022 || echo "Some native modules failed, continuing..."
 
       - name: Build Windows package
@@ -49,9 +41,32 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: npx gulp vscode-win32-x64-min
 
-      - name: Upload artifact
+      - name: Zip the output
+        shell: powershell
+        run: |
+          Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath incogniAI-void-windows-x64.zip
+          Write-Host "Zip created: incogniAI-void-windows-x64.zip"
+
+      - name: Upload to VPS via SCP
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          # Install sshpass for password-based SCP
+          sudo apt-get install -y sshpass
+
+          # Upload the zip to the server's downloads folder
+          sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no \
+            incogniAI-void-windows-x64.zip \
+            $VPS_USER@$VPS_HOST:/var/www/incogni-ai/public/downloads/incogniAI-void-windows-x64.zip
+
+          echo "Uploaded to server successfully!"
+
+      - name: Upload artifact (backup to GitHub too)
         uses: actions/upload-artifact@v4
         with:
           name: incogniAI-void-windows-x64
-          path: ..\VSCode-win32-x64
+          path: incogniAI-void-windows-x64.zip
           retention-days: 7
