@@ -1,7 +1,7 @@
 name: Build Windows EXE
 
 on:
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -10,7 +10,7 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,15 +19,42 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          
-      - name: Install dependencies
-        run: npm install
 
-      - name: Build Windows Executable
-        run: npx gulp vscode-win32-x64 --max-old-space-size=8192
-        
-      - name: Upload EXE artifact
+      - name: Install Visual Studio Build Tools & windows-build-tools
+        shell: powershell
+        run: |
+          # Enable VS2022 build tools which are already installed on the runner
+          # Set msvs_version for node-gyp
+          npm config set msvs_version 2022
+
+      - name: Install Python (for node-gyp)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        shell: cmd
+        env:
+          npm_config_msvs_version: '2022'
+        run: npm install --ignore-scripts
+
+      - name: Rebuild native modules
+        shell: cmd
+        env:
+          npm_config_msvs_version: '2022'
+        run: |
+          npm rebuild --msvs_version=2022
+
+      - name: Build Windows package
+        shell: cmd
+        env:
+          npm_config_msvs_version: '2022'
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npx gulp vscode-win32-x64-min
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: incogniAI-void-windows-x64
-          path: ../VSCode-win32-x64
+          path: ..\VSCode-win32-x64
+          retention-days: 7
