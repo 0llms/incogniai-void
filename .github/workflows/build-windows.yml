@@ -25,12 +25,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         shell: cmd
         env:
           VSCODE_SKIP_PREINSTALL: '1'
           CI: 'true'
         run: npm install --ignore-scripts
+
+      - name: Install build sub-dependencies
+        shell: cmd
+        env:
+          VSCODE_SKIP_PREINSTALL: '1'
+          CI: 'true'
+        run: node build/npm/postinstall.js
 
       - name: Build Windows package
         shell: cmd
@@ -57,7 +64,7 @@ jobs:
           target: "/var/www/incogni-ai/public/downloads/"
           strip_components: 0
 
-      - name: Upload artifact (backup to GitHub too)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: incogniAI-void-windows-x64
