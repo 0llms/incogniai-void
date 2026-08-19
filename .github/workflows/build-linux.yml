@@ -1,0 +1,53 @@
+name: Build Linux Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build Linux Package
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          VSCODE_SKIP_PREINSTALL: '1'
+          CI: 'true'
+        run: npx gulp vscode-linux-x64-min
+
+      - name: Tar output
+        run: |
+          tar -czf KodaAI-IDE-Desktop.tar.gz -C .. VSCode-linux-x64
+
+      - name: Upload to VPS via SCP Action
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          source: "KodaAI-IDE-Desktop.tar.gz"
+          target: "/var/www/incogni-ai/public/downloads/"
+          strip_components: 0
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KodaAI-IDE-Desktop
+          path: KodaAI-IDE-Desktop.tar.gz
+          retention-days: 7
