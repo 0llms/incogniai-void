@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/voideditor/void.git
+	fetch = +refs/heads/main:refs/remotes/origin/main
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[pull]
+	rebase = merges
+[blame]
+	ignoreRevsFile = .git-blame-ignore-revs
+[remote "0llms"]
+	url = https://github.com/0llms/incogniai-void.git
+	fetch = +refs/heads/*:refs/remotes/0llms/*
