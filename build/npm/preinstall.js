@@ -26,11 +26,15 @@ const cp = require('child_process');
 const os = require('os');
 
 if (process.platform === 'win32') {
-	if (!hasSupportedVisualStudioVersion()) {
+	if (!hasSupportedVisualStudioVersion() && !process.env['VSCODE_SKIP_PREINSTALL'] && !process.env['CI']) {
 		console.error('\x1b[1;31m*** Invalid C/C++ Compiler Toolchain. Please check https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites.\x1b[0;0m');
 		throw new Error();
 	}
-	installHeaders();
+	try {
+		installHeaders();
+	} catch (e) {
+		console.warn('installHeaders failed, continuing...', e.message);
+	}
 }
 
 if (process.arch !== os.arch()) {

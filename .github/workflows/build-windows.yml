@@ -25,20 +25,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies (skip native builds)
-        shell: cmd
-        run: npm install --ignore-scripts
-
-      - name: Rebuild native modules with VS 2022
+      - name: Install dependencies
         shell: cmd
         env:
-          GYP_MSVS_VERSION: '2022'
-        run: npm rebuild --msvs_version=2022 || echo "Some native modules failed, continuing..."
+          VSCODE_SKIP_PREINSTALL: '1'
+          CI: 'true'
+        run: npm install --ignore-scripts
 
       - name: Build Windows package
         shell: cmd
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+          VSCODE_SKIP_PREINSTALL: '1'
+          CI: 'true'
         run: npx gulp vscode-win32-x64-min
 
       - name: Zip the output
@@ -47,22 +46,16 @@ jobs:
           Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath incogniAI-void-windows-x64.zip
           Write-Host "Zip created: incogniAI-void-windows-x64.zip"
 
-      - name: Upload to VPS via SCP
-        shell: bash
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
-        run: |
-          # Install sshpass for password-based SCP
-          sudo apt-get install -y sshpass
-
-          # Upload the zip to the server's downloads folder
-          sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no \
-            incogniAI-void-windows-x64.zip \
-            $VPS_USER@$VPS_HOST:/var/www/incogni-ai/public/downloads/incogniAI-void-windows-x64.zip
-
-          echo "Uploaded to server successfully!"
+      - name: Upload to VPS via SCP Action
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          source: "incogniAI-void-windows-x64.zip"
+          target: "/var/www/incogni-ai/public/downloads/"
+          strip_components: 0
 
       - name: Upload artifact (backup to GitHub too)
         uses: actions/upload-artifact@v4
