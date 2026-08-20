@@ -63,20 +63,18 @@ jobs:
           Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath incogniAI-void-windows-x64.zip
           Write-Host "Zip created: incogniAI-void-windows-x64.zip"
 
-      - name: Upload to VPS via SCP Action
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: 22
-          source: "incogniAI-void-windows-x64.zip"
-          target: "/var/www/incogni-ai/public/downloads/"
-          strip_components: 0
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: incogniAI-void-windows-x64
           path: incogniAI-void-windows-x64.zip
           retention-days: 7
+
+      - name: Upload to VPS via Python SCP
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          pip install paramiko scp
+          python -c "import paramiko, os; from scp import SCPClient; ssh = paramiko.SSHClient(); ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()); ssh.connect(os.environ['VPS_HOST'], username=os.environ['VPS_USER'], password=os.environ['VPS_PASSWORD']); scp = SCPClient(ssh.get_transport()); scp.put('incogniAI-void-windows-x64.zip', '/var/www/incogni-ai/public/downloads/incogniAI-void-windows-x64.zip'); scp.close(); print('Windows package uploaded to VPS successfully!')"
