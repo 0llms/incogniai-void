@@ -1,61 +1,28 @@
-## Void is now deprecated.
-Void is deprecated and no longer accepting contributions.
-Thank you to everyone who contributed, both with lines of code and support from the community. Void remains open source and is still one of the best references to use when forking VS Code.
+Welcome to IncogniAI IDE
 
+IncogniAI IDE, built on top of the open-source Void / VS Code framework, is a free, open-source AI-powered development environment designed to work seamlessly with IncogniAI models.
+🔌 Getting Started
 
-## Download
+    Hosted users: If you're using IncogniAI Cloud, simply point the IDE to https://chat.hsrprojects.org and you're ready to go.
+    Self-hosted users: If you're running IncogniAI on your own server, or connecting via an API key from another provider, you can do that too — you'll just need to tweak a few configuration values in the IDE so it knows where to send requests.
 
-To view a list of newer Void forks, see [Void Forks](http://github.com/voideditor/void-forks/).
+Detailed setup instructions for self-hosting are available in the project's README.
+🤝 Contributing
 
-To download an old version of Void, see [Releases](https://github.com/voideditor/void/releases).
+We'd love your help! Whether you're here to squash bugs, polish the UI, or ship a brand-new feature, contributions of every size are welcome.
+How to contribute
 
-## Forking VS Code
+    Browse the Issues tab and pick something that interests you.
+    Fork the repository and create a new branch for your change.
+    Submit a pull request with a clear description of what you did and why.
 
-If you're forking VS Code, you might still want to reference Void's logic, and see our [Codebase Guide](https://github.com/voideditor/void/blob/main/VOID_CODEBASE_GUIDE.md) and [How to Contribute](https://github.com/voideditor/void/blob/main/HOW_TO_CONTRIBUTE.md).
+💸 Cost & API Access
 
-- We mount React + Tailwind. This is not possible in plain VS Code, and required extending the build pipeline to compile React and [scope](https://github.com/andrewpareles/scope-tailwind) Tailwind ourselves.
+IncogniAI IDE is completely free to use. The only cost involved is if you choose to use the IncogniAI Cloud API instead of self-hosting:
 
-- You can copy our GitHub Actions to package, sign, and auto-update Void. VS Code's build pipeline is private, so this is normally very hard.
+    Create a free account at chat.hsrprojects.org.
+    Go to Developer → Fund Credits to top up your account.
+    Our API pricing is intentionally cheap — pay only for what you use.
+    Want to stay on a budget? Set a monthly credit limit in your developer dashboard so you never overspend.
 
-- Our AI provider code is built from scratch, allowing us to support autocomplete (FIM) and other custom responses. We expose grammars for common `<thinking>` tags, tool tags, etc. Feel free to reference our architecture for using IPC and satisfying CSP.
-
-- Use our custom services to edit files. EditCodeService lets you show diffs as code streams in, even token by token. VoidModelService lets you edit files in the background and syncs OS files with your text buffers.
-
-- Everything we've done is 100% open source. See [repos](https://github.com/orgs/voideditor/repositories) for a complete picture of all the repos that make up Void.
-
-
-
-# Welcome to Void.
-
-<div align="center">
-	<img
-		src="./src/vs/workbench/browser/parts/editor/media/slice_of_void.png"
-	 	alt="Void Welcome"
-		width="300"
-	 	height="300"
-	/>
-</div>
-
-Use AI agents on your codebase, checkpoint and visualize changes, and bring any model or host locally. Void sends messages directly to providers without retaining your data.
-
-This repo contains the full sourcecode for Void's Desktop app. If you're new, welcome!
-
-- 🧭 [Website](https://voideditor.com)
-
-- 🚙 [Roadmap](https://github.com/orgs/voideditor/projects/2)
-
-- 🔨 [Contribute](https://github.com/voideditor/void/blob/main/HOW_TO_CONTRIBUTE.md)
-
-
-
-
-## Reference
-
-Void is a fork of the [vscode](https://github.com/microsoft/vscode) repository. For a guide to our codebase, see [VOID_CODEBASE_GUIDE](https://github.com/voideditor/void/blob/main/VOID_CODEBASE_GUIDE.md).
-
-For a guide on how to develop your own version of Void, see [HOW_TO_CONTRIBUTE](https://github.com/voideditor/void/blob/main/HOW_TO_CONTRIBUTE.md) and [void-builder](https://github.com/voideditor/void-builder).
-
-
-
-## Support
-You can always reach us in our [Discord server](https://discord.gg/RSNjgaugJs) or contact us via email at hello@voideditor.com.
+We're glad you're here. Happy coding! 🚀
