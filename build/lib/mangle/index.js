@@ -488,6 +488,11 @@ class Mangler {
             }
         };
         const appendRename = (newText, loc) => {
+            // Skip any rename locations inside node_modules to avoid overlapping edits
+            // caused by third-party .d.ts files (e.g. google-auth-library)
+            if (loc.fileName.includes('node_modules')) {
+                return;
+            }
             appendEdit(loc.fileName, {
                 newText: (loc.prefixText || '') + newText + (loc.suffixText || ''),
                 offset: loc.textSpan.start,
