@@ -37,6 +37,9 @@ jobs:
           npm_config_ignore_scripts: 'true'
         run: node build/npm/postinstall.js
 
+      - name: Build React components
+        run: npm run buildreact
+
       - name: Build Linux Package
         env:
           NODE_OPTIONS: --max-old-space-size=8192

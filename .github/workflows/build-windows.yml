@@ -43,6 +43,10 @@ jobs:
           npm_config_msvs_version: '2022'
         run: node build/npm/postinstall.js
 
+      - name: Build React components
+        shell: cmd
+        run: npm run buildreact
+
       - name: Build Windows package
         shell: cmd
         env:
