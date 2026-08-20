@@ -1160,7 +1160,7 @@ export const Settings = () => {
 
 					<div className='max-w-3xl'>
 
-						<h1 className='text-2xl w-full'>{`Void's Settings`}</h1>
+						<h1 className='text-2xl w-full'>{`IncogniAI IDE Settings`}</h1>
 
 						<div className='w-full h-[1px] my-2' />
 
@@ -1395,7 +1395,7 @@ export const Settings = () => {
 								<div>
 									<ErrorBoundary>
 										<h2 className='text-3xl mb-2'>One-Click Switch</h2>
-										<h4 className='text-void-fg-3 mb-4'>{`Transfer your editor settings into Void.`}</h4>
+										<h4 className='text-void-fg-3 mb-4'>{`Transfer your editor settings into IncogniAI IDE.`}</h4>
 
 										<div className='flex flex-col gap-2'>
 											<OneClickSwitchButton className='w-48' fromEditor="VS Code" />

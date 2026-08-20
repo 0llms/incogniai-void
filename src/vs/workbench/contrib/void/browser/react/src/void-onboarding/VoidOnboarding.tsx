@@ -3,15 +3,12 @@
  *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
  *--------------------------------------------------------------------------------------*/
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccessor, useIsDark, useSettingsState } from '../util/services.js';
-import { Brain, Check, ChevronRight, DollarSign, ExternalLink, Lock, X } from 'lucide-react';
-import { displayInfoOfProviderName, ProviderName, providerNames, localProviderNames, featureNames, FeatureName, isFeatureNameDisabled } from '../../../../common/voidSettingsTypes.js';
-import { ChatMarkdownRender } from '../markdown/ChatMarkdownRender.js';
+import { Brain, Check, ChevronRight, ExternalLink, Lock, Shield, Sparkles, Zap } from 'lucide-react';
+import { displayInfoOfProviderName, ProviderName, providerNames, localProviderNames, FeatureName, isFeatureNameDisabled } from '../../../../common/voidSettingsTypes.js';
 import { OllamaSetupInstructions, OneClickSwitchButton, SettingsForProvider, ModelDump } from '../void-settings-tsx/Settings.js';
-import { ColorScheme } from '../../../../../../../platform/theme/common/theme.js';
 import ErrorBoundary from '../sidebar-tsx/ErrorBoundary.js';
-import { isLinux } from '../../../../../../../base/common/platform.js';
 
 const OVERRIDE_VALUE = false
 
@@ -26,7 +23,7 @@ export const VoidOnboarding = () => {
 		<div className={`@@void-scope ${isDark ? 'dark' : ''}`}>
 			<div
 				className={`
-					bg-void-bg-3 fixed top-0 right-0 bottom-0 left-0 width-full z-[99999]
+					bg-[#070709] text-slate-100 fixed top-0 right-0 bottom-0 left-0 width-full z-[99999]
 					transition-all duration-1000 ${isOnboardingComplete ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
 				`}
 				style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -39,32 +36,26 @@ export const VoidOnboarding = () => {
 	)
 }
 
-const VoidIcon = () => {
-	const accessor = useAccessor()
-	const themeService = accessor.get('IThemeService')
+const IncogniAILogo = () => {
+	return (
+		<div className="flex flex-col items-center justify-center gap-3 my-4">
+			<div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 p-1 shadow-[0_0_35px_rgba(99,102,241,0.5)] animate-pulse">
+				<div className="w-full h-full bg-[#070709] rounded-xl flex items-center justify-center">
+					<Sparkles className="w-9 h-9 text-indigo-400" />
+				</div>
+			</div>
+			<div className="text-center">
+				<div className="text-2xl font-bold tracking-tight text-white flex items-center justify-center gap-2">
+					<span>IncogniAI</span>
+					<span className="text-indigo-400 text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 font-mono">IDE</span>
+				</div>
+				<p className="text-xs text-slate-400 mt-1 font-mono">Privacy-First AI Code Editor</p>
+			</div>
+		</div>
+	);
+};
 
-	const divRef = useRef<HTMLDivElement | null>(null)
-
-	useEffect(() => {
-		// void icon style
-		const updateTheme = () => {
-			const theme = themeService.getColorTheme().type
-			const isDark = theme === ColorScheme.DARK || theme === ColorScheme.HIGH_CONTRAST_DARK
-			if (divRef.current) {
-				divRef.current.style.maxWidth = '220px'
-				divRef.current.style.opacity = '50%'
-				divRef.current.style.filter = isDark ? '' : 'invert(1)' //brightness(.5)
-			}
-		}
-		updateTheme()
-		const d = themeService.onDidColorThemeChange(updateTheme)
-		return () => d.dispose()
-	}, [])
-
-	return <div ref={divRef} className='@@void-void-icon' />
-}
-
-const FADE_DURATION_MS = 2000
+const FADE_DURATION_MS = 1000
 
 const FadeIn = ({ children, className, delayMs = 0, durationMs, ...props }: { children: React.ReactNode, delayMs?: number, durationMs?: number, className?: string } & React.HTMLAttributes<HTMLDivElement>) => {
 
@@ -73,14 +64,12 @@ const FadeIn = ({ children, className, delayMs = 0, durationMs, ...props }: { ch
 	const effectiveDurationMs = durationMs ?? FADE_DURATION_MS
 
 	useEffect(() => {
-
 		const timeout = setTimeout(() => {
 			setOpacity(1)
 		}, delayMs)
 
 		return () => clearTimeout(timeout)
 	}, [setOpacity, delayMs])
-
 
 	return (
 		<div className={className} style={{ opacity, transition: `opacity ${effectiveDurationMs}ms ease-in-out` }} {...props}>
@@ -90,10 +79,6 @@ const FadeIn = ({ children, className, delayMs = 0, durationMs, ...props }: { ch
 }
 
 // Onboarding
-
-// =============================================
-//  New AddProvidersPage Component and helpers
-// =============================================
 
 const tabNames = ['Free', 'Paid', 'Local'] as const;
 
@@ -112,15 +97,14 @@ const providerNamesOfTab: Record<TabName, ProviderName[]> = {
 
 const descriptionOfTab: Record<TabName, string> = {
 	Free: `Providers with a 100% free tier. Add as many as you'd like!`,
-	Paid: `Connect directly with any provider (bring your own key).`,
-	Local: `Active providers should appear automatically. Add as many as you'd like! `,
-	'Cloud/Other': `Add as many as you'd like! Reach out for custom configuration requests.`,
+	Paid: `Connect directly with any provider (bring your own API key).`,
+	Local: `Active local models (Ollama, LM Studio) are detected automatically.`,
+	'Cloud/Other': `Add enterprise cloud endpoint options for your workflow.`,
 };
-
 
 const featureNameMap: { display: string, featureName: FeatureName }[] = [
 	{ display: 'Chat', featureName: 'Chat' },
-	{ display: 'Quick Edit', featureName: 'Ctrl+K' },
+	{ display: 'Quick Edit (Ctrl+K)', featureName: 'Ctrl+K' },
 	{ display: 'Autocomplete', featureName: 'Autocomplete' },
 	{ display: 'Fast Apply', featureName: 'Apply' },
 	{ display: 'Source Control', featureName: 'SCM' },
@@ -129,9 +113,10 @@ const featureNameMap: { display: string, featureName: FeatureName }[] = [
 const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setPageIndex: (index: number) => void }) => {
 	const [currentTab, setCurrentTab] = useState<TabName>('Free');
 	const settingsState = useSettingsState();
+	const accessor = useAccessor();
+	const voidSettingsService = accessor.get('IVoidSettingsService');
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	// Clear error message after 5 seconds
 	useEffect(() => {
 		let timeoutId: NodeJS.Timeout | null = null;
 
@@ -141,7 +126,6 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 			}, 5000);
 		}
 
-		// Cleanup function to clear the timeout if component unmounts or error changes
 		return () => {
 			if (timeoutId) {
 				clearTimeout(timeoutId);
@@ -149,503 +133,245 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 		};
 	}, [errorMessage]);
 
-	return (<div className="flex flex-col md:flex-row w-full h-[80vh] gap-6 max-w-[900px] mx-auto relative">
-		{/* Left Column */}
-		<div className="md:w-1/4 w-full flex flex-col gap-6 p-6 border-none border-void-border-2 h-full overflow-y-auto">
-			{/* Tab Selector */}
-			<div className="flex md:flex-col gap-2">
-				{[...tabNames, 'Cloud/Other'].map(tab => (
-					<button
-						key={tab}
-						className={`py-2 px-4 rounded-md text-left ${currentTab === tab
-							? 'bg-[#0e70c0]/80 text-white font-medium shadow-sm'
-							: 'bg-void-bg-2 hover:bg-void-bg-2/80 text-void-fg-1'
-							} transition-all duration-200`}
-						onClick={() => {
-							setCurrentTab(tab as TabName);
-							setErrorMessage(null); // Reset error message when changing tabs
-						}}
-					>
-						{tab}
-					</button>
-				))}
+	return (
+		<div className="flex flex-col md:flex-row w-full h-[75vh] gap-6 max-w-[950px] mx-auto relative bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+			{/* Left Column */}
+			<div className="md:w-1/3 w-full flex flex-col gap-6 p-4 border-r border-slate-800/80 h-full overflow-y-auto">
+				<div className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+					<Brain className="w-5 h-5 text-indigo-400" />
+					<span>AI Providers</span>
+				</div>
+
+				{/* Tab Selector */}
+				<div className="flex md:flex-col gap-2">
+					{[...tabNames, 'Cloud/Other'].map(tab => (
+						<button
+							key={tab}
+							className={`py-2.5 px-4 rounded-xl text-left font-medium text-sm transition-all duration-200 ${currentTab === tab
+								? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+								: 'bg-slate-800/60 hover:bg-slate-800 text-slate-300'
+								}`}
+							onClick={() => {
+								setCurrentTab(tab as TabName);
+								setErrorMessage(null);
+							}}
+						>
+							{tab}
+						</button>
+					))}
+				</div>
+
+				{/* Feature Checklist */}
+				<div className="flex flex-col gap-2 mt-auto pt-4 border-t border-slate-800/80 text-xs font-mono text-slate-400">
+					<span className="text-slate-200 font-semibold mb-1">Feature Status</span>
+					{featureNameMap.map(({ display, featureName }) => {
+						const hasModel = settingsState.modelSelectionOfFeature[featureName] !== null;
+						return (
+							<div key={featureName} className="flex items-center gap-2">
+								{hasModel ? (
+									<Check className="w-4 h-4 text-emerald-400" />
+								) : (
+									<div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+								)}
+								<span>{display}</span>
+							</div>
+						);
+					})}
+				</div>
 			</div>
 
-			{/* Feature Checklist */}
-			<div className="flex flex-col gap-1 mt-4 text-sm opacity-80">
-				{featureNameMap.map(({ display, featureName }) => {
-					const hasModel = settingsState.modelSelectionOfFeature[featureName] !== null;
-					return (
-						<div key={featureName} className="flex items-center gap-2">
-							{hasModel ? (
-								<Check className="w-4 h-4 text-emerald-500" />
-							) : (
-								<div className="w-3 h-3 rounded-full flex items-center justify-center">
-									<div className="w-1 h-1 rounded-full bg-white/70"></div>
-								</div>
-							)}
-							<span>{display}</span>
+			{/* Right Column */}
+			<div className="flex-1 flex flex-col items-center justify-start p-4 h-full overflow-y-auto text-left">
+				<div className="text-2xl font-bold mb-1 text-white w-full">Configure {currentTab} Models</div>
+				<div className="text-xs text-slate-400 mb-6 w-full">{descriptionOfTab[currentTab]}</div>
+
+				{providerNamesOfTab[currentTab].map((providerName) => (
+					<div key={providerName} className="w-full max-w-xl mb-6 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+						<div className="text-sm font-semibold mb-2 text-indigo-300">
+							{displayInfoOfProviderName(providerName).title}
 						</div>
-					);
-				})}
-			</div>
-		</div>
-
-		{/* Right Column */}
-		<div className="flex-1 flex flex-col items-center justify-start p-6 h-full overflow-y-auto">
-			<div className="text-5xl mb-2 text-center w-full">Add a Provider</div>
-
-			<div className="w-full max-w-xl mt-4 mb-10">
-				<div className="text-4xl font-light my-4 w-full">{currentTab}</div>
-				<div className="text-sm opacity-80 text-void-fg-3 my-4 w-full">{descriptionOfTab[currentTab]}</div>
-			</div>
-
-			{providerNamesOfTab[currentTab].map((providerName) => (
-				<div key={providerName} className="w-full max-w-xl mb-10">
-					<div className="text-xl mb-2">
-						Add {displayInfoOfProviderName(providerName).title}
-						{providerName === 'gemini' && (
-							<span
-								data-tooltip-id="void-tooltip-provider-info"
-								data-tooltip-content="Gemini 2.5 Pro offers 25 free messages a day, and Gemini 2.5 Flash offers 500. We recommend using models down the line as you run out of free credits."
-								data-tooltip-place="right"
-								className="ml-1 text-xs align-top text-blue-400"
-							>*</span>
-						)}
-						{providerName === 'openRouter' && (
-							<span
-								data-tooltip-id="void-tooltip-provider-info"
-								data-tooltip-content="OpenRouter offers 50 free messages a day, and 1000 if you deposit $10. Only applies to models labeled ':free'."
-								data-tooltip-place="right"
-								className="ml-1 text-xs align-top text-blue-400"
-							>*</span>
-						)}
+						<div>
+							<SettingsForProvider providerName={providerName} showProviderTitle={false} showProviderSuggestions={true} />
+						</div>
+						{providerName === 'ollama' && <OllamaSetupInstructions />}
 					</div>
-					<div>
-						<SettingsForProvider providerName={providerName} showProviderTitle={false} showProviderSuggestions={true} />
+				))}
 
+				{(currentTab === 'Local' || currentTab === 'Cloud/Other') && (
+					<div className="w-full max-w-xl mt-4 bg-slate-950/60 rounded-xl p-4 border border-slate-800">
+						<div className="text-sm font-semibold mb-2 text-indigo-300">Custom Models</div>
+						{currentTab === 'Local' && <ModelDump filteredProviders={localProviderNames} />}
+						{currentTab === 'Cloud/Other' && <ModelDump filteredProviders={cloudProviders} />}
 					</div>
-					{providerName === 'ollama' && <OllamaSetupInstructions />}
-				</div>
-			))}
-
-			{(currentTab === 'Local' || currentTab === 'Cloud/Other') && (
-				<div className="w-full max-w-xl mt-8 bg-void-bg-2/50 rounded-lg p-6 border border-void-border-4">
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-xl font-medium">Models</div>
-					</div>
-
-					{currentTab === 'Local' && (
-						<div className="text-sm opacity-80 text-void-fg-3 my-4 w-full">Local models should be detected automatically. You can add custom models below.</div>
-					)}
-
-					{currentTab === 'Local' && <ModelDump filteredProviders={localProviderNames} />}
-					{currentTab === 'Cloud/Other' && <ModelDump filteredProviders={cloudProviders} />}
-				</div>
-			)}
-
-
-
-			{/* Navigation buttons in right column */}
-			<div className="flex flex-col items-end w-full mt-auto pt-8">
-				{errorMessage && (
-					<div className="text-amber-400 mb-2 text-sm opacity-80 transition-opacity duration-300">{errorMessage}</div>
 				)}
-				<div className="flex items-center gap-2">
-					<PreviousButton onClick={() => setPageIndex(pageIndex - 1)} />
-					<NextButton
-						onClick={() => {
-							const isDisabled = isFeatureNameDisabled('Chat', settingsState)
 
-							if (!isDisabled) {
+				{/* Bottom Actions */}
+				<div className="flex flex-col items-center w-full mt-auto pt-6 border-t border-slate-800/80 gap-3">
+					{errorMessage && (
+						<div className="text-amber-400 text-xs font-mono">{errorMessage}</div>
+					)}
+					
+					<div className="flex items-center justify-between w-full">
+						<button
+							onClick={() => setPageIndex(pageIndex - 1)}
+							className="px-5 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-medium transition-colors"
+						>
+							Back
+						</button>
+
+						<button
+							onClick={() => {
 								setPageIndex(pageIndex + 1);
 								setErrorMessage(null);
-							} else {
-								// Show error message
-								setErrorMessage("Please set up at least one Chat model before moving on.");
-							}
-						}}
-					/>
+							}}
+							className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
+						>
+							<span>Continue</span>
+							<ChevronRight className="w-4 h-4" />
+						</button>
+					</div>
+
+					<button
+						onClick={() => voidSettingsService.setGlobalSetting('isOnboardingComplete', true)}
+						className="text-xs text-slate-400 hover:text-white underline underline-offset-4 opacity-70 hover:opacity-100 transition-all mt-1"
+					>
+						Skip API Key Setup & Enter IDE
+					</button>
 				</div>
 			</div>
 		</div>
-	</div>);
+	);
 };
-// =============================================
-// 	OnboardingPage
-// 		title:
-// 			div
-// 				"Welcome to incogniAI IDE"
-// 			image
-// 		content:<></>
-// 		title
-// 		content
-// 		prev/next
 
-// 	OnboardingPage
-// 		title:
-// 			div
-// 				"How would you like to use Void?"
-// 		content:
-// 			ModelQuestionContent
-// 				|
-// 					div
-// 						"I want to:"
-// 					div
-// 						"Use the smartest models"
-// 						"Keep my data fully private"
-// 						"Save money"
-// 						"I don't know"
-// 				| div
-// 					| div
-// 						"We recommend using "
-// 						"Set API"
-// 					| div
-// 						""
-// 					| div
-//
-// 		title
-// 		content
-// 		prev/next
-//
-// 	OnboardingPage
-// 		title
-// 		content
-// 		prev/next
-
-const NextButton = ({ onClick, ...props }: { onClick: () => void } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-
-	// Create a new props object without the disabled attribute
-	const { disabled, ...buttonProps } = props;
-
+const OnboardingPageShell = ({ content, bottom }: { content?: React.ReactNode, bottom?: React.ReactNode }) => {
 	return (
-		<button
-			onClick={disabled ? undefined : onClick}
-			onDoubleClick={onClick}
-			className={`px-6 py-2 bg-zinc-100 ${disabled
-				? 'bg-zinc-100/40 cursor-not-allowed'
-				: 'hover:bg-zinc-100'
-				} rounded text-black duration-600 transition-all
-			`}
-			{...disabled && {
-				'data-tooltip-id': 'void-tooltip',
-				"data-tooltip-content": 'Please enter all required fields or choose another provider', // (double-click to proceed anyway, can come back in Settings)
-				"data-tooltip-place": 'top',
-			}}
-			{...buttonProps}
-		>
-			Next
-		</button>
-	)
-}
-
-const PreviousButton = ({ onClick, ...props }: { onClick: () => void } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-	return (
-		<button
-			onClick={onClick}
-			className="px-6 py-2 rounded text-void-fg-3 opacity-80 hover:brightness-115 duration-600 transition-all"
-			{...props}
-		>
-			Back
-		</button>
-	)
-}
-
-
-
-const OnboardingPageShell = ({ top, bottom, content, hasMaxWidth = true, className = '', }: {
-	top?: React.ReactNode,
-	bottom?: React.ReactNode,
-	content?: React.ReactNode,
-	hasMaxWidth?: boolean,
-	className?: string,
-}) => {
-	return (
-		<div className={`h-[80vh] text-lg flex flex-col gap-4 w-full mx-auto ${hasMaxWidth ? 'max-w-[600px]' : ''} ${className}`}>
-			{top && <FadeIn className='w-full mb-auto pt-16'>{top}</FadeIn>}
-			{content && <FadeIn className='w-full my-auto'>{content}</FadeIn>}
-			{bottom && <div className='w-full pb-8'>{bottom}</div>}
+		<div className="h-[80vh] text-base flex flex-col justify-between items-center w-full max-w-[650px] mx-auto p-4">
+			{content && <FadeIn className="w-full my-auto">{content}</FadeIn>}
+			{bottom && <div className="w-full pt-4">{bottom}</div>}
 		</div>
-	)
-}
-
-const OllamaDownloadOrRemoveModelButton = ({ modelName, isModelInstalled, sizeGb }: { modelName: string, isModelInstalled: boolean, sizeGb: number | false | 'not-known' }) => {
-	// for now just link to the ollama download page
-	return <a
-		href={`https://ollama.com/library/${modelName}`}
-		target="_blank"
-		rel="noopener noreferrer"
-		className="flex items-center justify-center text-void-fg-2 hover:text-void-fg-1"
-	>
-		<ExternalLink className="w-3.5 h-3.5" />
-	</a>
-
-}
-
-
-const YesNoText = ({ val }: { val: boolean | null }) => {
-
-	return <div
-		className={
-			val === true ? "text text-emerald-500"
-				: val === false ? 'text-rose-600'
-					: "text text-amber-300"
-		}
-	>
-		{
-			val === true ? "Yes"
-				: val === false ? 'No'
-					: "Yes*"
-		}
-	</div>
-
-}
-
-
-
-const abbreviateNumber = (num: number): string => {
-	if (num >= 1000000) {
-		// For millions
-		return Math.floor(num / 1000000) + 'M';
-	} else if (num >= 1000) {
-		// For thousands
-		return Math.floor(num / 1000) + 'K';
-	} else {
-		// For numbers less than 1000
-		return num.toString();
-	}
-}
-
-
-
-
-
-const PrimaryActionButton = ({ children, className, ringSize, ...props }: { children: React.ReactNode, ringSize?: undefined | 'xl' | 'screen' } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-
-
-	return (
-		<button
-			type='button'
-			className={`
-				flex items-center justify-center
-
-				text-white dark:text-black
-				bg-black/90 dark:bg-white/90
-
-				${ringSize === 'xl' ? `
-					gap-2 px-16 py-8
-					transition-all duration-300 ease-in-out
-					`
-					: ringSize === 'screen' ? `
-					gap-2 px-16 py-8
-					transition-all duration-1000 ease-in-out
-					`: ringSize === undefined ? `
-					gap-1 px-4 py-2
-					transition-all duration-300 ease-in-out
-				`: ''}
-
-				rounded-lg
-				group
-				${className}
-			`}
-			{...props}
-		>
-			{children}
-			<ChevronRight
-				className={`
-					transition-all duration-300 ease-in-out
-
-					transform
-					group-hover:translate-x-1
-					group-active:translate-x-1
-				`}
-			/>
-		</button>
-	)
-}
-
-
-type WantToUseOption = 'smart' | 'private' | 'cheap' | 'all'
+	);
+};
 
 const VoidOnboardingContent = () => {
-
 
 	const accessor = useAccessor()
 	const voidSettingsService = accessor.get('IVoidSettingsService')
 	const voidMetricsService = accessor.get('IMetricsService')
-
 	const voidSettingsState = useSettingsState()
 
 	const [pageIndex, setPageIndex] = useState(0)
 
-
-	// page 1 state
-	const [wantToUseOption, setWantToUseOption] = useState<WantToUseOption>('smart')
-
-	// Replace the single selectedProviderName with four separate states
-	// page 2 state - each tab gets its own state
-	const [selectedIntelligentProvider, setSelectedIntelligentProvider] = useState<ProviderName>('anthropic');
-	const [selectedPrivateProvider, setSelectedPrivateProvider] = useState<ProviderName>('ollama');
-	const [selectedAffordableProvider, setSelectedAffordableProvider] = useState<ProviderName>('gemini');
-	const [selectedAllProvider, setSelectedAllProvider] = useState<ProviderName>('anthropic');
-
-	// Helper function to get the current selected provider based on active tab
-	const getSelectedProvider = (): ProviderName => {
-		switch (wantToUseOption) {
-			case 'smart': return selectedIntelligentProvider;
-			case 'private': return selectedPrivateProvider;
-			case 'cheap': return selectedAffordableProvider;
-			case 'all': return selectedAllProvider;
-		}
-	}
-
-	// Helper function to set the selected provider for the current tab
-	const setSelectedProvider = (provider: ProviderName) => {
-		switch (wantToUseOption) {
-			case 'smart': setSelectedIntelligentProvider(provider); break;
-			case 'private': setSelectedPrivateProvider(provider); break;
-			case 'cheap': setSelectedAffordableProvider(provider); break;
-			case 'all': setSelectedAllProvider(provider); break;
-		}
-	}
-
-	const providerNamesOfWantToUseOption: { [wantToUseOption in WantToUseOption]: ProviderName[] } = {
-		smart: ['anthropic', 'openAI', 'gemini', 'openRouter'],
-		private: ['ollama', 'vLLM', 'openAICompatible', 'lmStudio'],
-		cheap: ['gemini', 'deepseek', 'openRouter', 'ollama', 'vLLM'],
-		all: providerNames,
-	}
-
-
-	const selectedProviderName = getSelectedProvider();
-	const didFillInProviderSettings = selectedProviderName && voidSettingsState.settingsOfProvider[selectedProviderName]._didFillInProviderSettings
-	const isApiKeyLongEnoughIfApiKeyExists = selectedProviderName && voidSettingsState.settingsOfProvider[selectedProviderName].apiKey ? voidSettingsState.settingsOfProvider[selectedProviderName].apiKey.length > 15 : true
-	const isAtLeastOneModel = selectedProviderName && voidSettingsState.settingsOfProvider[selectedProviderName].models.length >= 1
-
-	const didFillInSelectedProviderSettings = !!(didFillInProviderSettings && isApiKeyLongEnoughIfApiKeyExists && isAtLeastOneModel)
-
-	const prevAndNextButtons = <div className="max-w-[600px] w-full mx-auto flex flex-col items-end">
-		<div className="flex items-center gap-2">
-			<PreviousButton
-				onClick={() => { setPageIndex(pageIndex - 1) }}
-			/>
-			<NextButton
-				onClick={() => { setPageIndex(pageIndex + 1) }}
-			/>
-		</div>
-	</div>
-
-
-	const lastPagePrevAndNextButtons = <div className="max-w-[600px] w-full mx-auto flex flex-col items-end">
-		<div className="flex items-center gap-2">
-			<PreviousButton
-				onClick={() => { setPageIndex(pageIndex - 1) }}
-			/>
-			<PrimaryActionButton
-				onClick={() => {
-					voidSettingsService.setGlobalSetting('isOnboardingComplete', true);
-					voidMetricsService.capture('Completed Onboarding', { selectedProviderName, wantToUseOption })
-				}}
-				ringSize={voidSettingsState.globalSettings.isOnboardingComplete ? 'screen' : undefined}
-			>Enter incogniAI IDE</PrimaryActionButton>
-		</div>
-	</div>
-
-
-	// cannot be md
-	const basicDescOfWantToUseOption: { [wantToUseOption in WantToUseOption]: string } = {
-		smart: "Models with the best performance on benchmarks.",
-		private: "Host on your computer or local network for full data privacy.",
-		cheap: "Free and affordable options.",
-		all: "",
-	}
-
-	// can be md
-	const detailedDescOfWantToUseOption: { [wantToUseOption in WantToUseOption]: string } = {
-		smart: "Most intelligent and best for agent mode.",
-		private: "Private-hosted so your data never leaves your computer or network. [Email us](mailto:support@hsrprojects.org) for help setting up at your company.",
-		cheap: "Use great deals like Gemini 2.5 Pro, or self-host a model with Ollama or vLLM for free.",
-		all: "",
-	}
-
-	// Modified: initialize separate provider states on initial render instead of watching wantToUseOption changes
-	useEffect(() => {
-		if (selectedIntelligentProvider === undefined) {
-			setSelectedIntelligentProvider(providerNamesOfWantToUseOption['smart'][0]);
-		}
-		if (selectedPrivateProvider === undefined) {
-			setSelectedPrivateProvider(providerNamesOfWantToUseOption['private'][0]);
-		}
-		if (selectedAffordableProvider === undefined) {
-			setSelectedAffordableProvider(providerNamesOfWantToUseOption['cheap'][0]);
-		}
-		if (selectedAllProvider === undefined) {
-			setSelectedAllProvider(providerNamesOfWantToUseOption['all'][0]);
-		}
-	}, []);
-
-	// reset the page to page 0 if the user redos onboarding
 	useEffect(() => {
 		if (!voidSettingsState.globalSettings.isOnboardingComplete) {
 			setPageIndex(0)
 		}
 	}, [setPageIndex, voidSettingsState.globalSettings.isOnboardingComplete])
 
-
 	const contentOfIdx: { [pageIndex: number]: React.ReactNode } = {
 		0: <OnboardingPageShell
 			content={
-				<div className='flex flex-col items-center gap-8'>
-					<div className="text-5xl font-light text-center">Welcome to incogniAI IDE</div>
+				<div className="flex flex-col items-center gap-6 text-center bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl shadow-2xl">
+					<IncogniAILogo />
 
-					{/* Slice of Void image */}
-					<div className='max-w-md w-full h-[30vh] mx-auto flex items-center justify-center'>
-						{!isLinux && <VoidIcon />}
+					<h1 className="text-3xl font-extrabold text-white tracking-tight">
+						Welcome to IncogniAI IDE
+					</h1>
+					
+					<p className="text-sm text-slate-400 max-w-md leading-relaxed">
+						The ultimate privacy-first AI Code Editor. Powerful inline AI, local model routing, and complete data ownership.
+					</p>
+
+					{/* Highlights */}
+					<div className="grid grid-cols-1 gap-3 w-full max-w-md text-left text-xs text-slate-300 mt-2 font-mono">
+						<div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 flex items-center gap-3">
+							<Shield className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+							<span><strong>100% Privacy First</strong> — Zero telemetry or remote code logging.</span>
+						</div>
+						<div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 flex items-center gap-3">
+							<Zap className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+							<span><strong>Local & Cloud Models</strong> — Use Ollama, Claude, DeepSeek, or OpenAI.</span>
+						</div>
+						<div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 flex items-center gap-3">
+							<Lock className="w-5 h-5 text-purple-400 flex-shrink-0" />
+							<span><strong>VS Code Native</strong> — Built on VS Code core with full extension support.</span>
+						</div>
 					</div>
 
-
-					<FadeIn
-						delayMs={1000}
-					>
-						<PrimaryActionButton
-							onClick={() => { setPageIndex(1) }}
+					{/* Main Continue Button */}
+					<div className="w-full max-w-md mt-4 flex flex-col items-center gap-4">
+						<button
+							onClick={() => setPageIndex(1)}
+							className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/50 transition-all flex items-center justify-center gap-2 border border-indigo-400/30"
 						>
-							Get Started
-						</PrimaryActionButton>
-					</FadeIn>
+							<span>Continue to Setup</span>
+							<ChevronRight className="w-4 h-4" />
+						</button>
 
+						<button
+							onClick={() => voidSettingsService.setGlobalSetting('isOnboardingComplete', true)}
+							className="text-xs text-slate-400 hover:text-white underline underline-offset-4 opacity-70 hover:opacity-100 transition-all"
+						>
+							Skip Onboarding & Enter IDE
+						</button>
+					</div>
 				</div>
 			}
 		/>,
 
-		1: <OnboardingPageShell hasMaxWidth={false}
+		1: <OnboardingPageShell
 			content={
 				<AddProvidersPage pageIndex={pageIndex} setPageIndex={setPageIndex} />
 			}
 		/>,
+
 		2: <OnboardingPageShell
-
 			content={
-				<div>
-					<div className="text-5xl font-light text-center">Settings and Themes</div>
+				<div className="flex flex-col items-center gap-6 text-center bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl shadow-2xl w-full">
+					<IncogniAILogo />
 
-					<div className="mt-8 text-center flex flex-col items-center gap-4 w-full max-w-md mx-auto">
-						<h4 className="text-void-fg-3 mb-4">Transfer your settings from an existing editor?</h4>
-						<OneClickSwitchButton className='w-full px-4 py-2' fromEditor="VS Code" />
-						<OneClickSwitchButton className='w-full px-4 py-2' fromEditor="Cursor" />
-						<OneClickSwitchButton className='w-full px-4 py-2' fromEditor="Windsurf" />
+					<h2 className="text-2xl font-bold text-white tracking-tight">
+						Import Settings & Finalize
+					</h2>
+
+					<p className="text-xs text-slate-400 max-w-md">
+						Transfer your existing editor extensions, keybindings, and settings into IncogniAI IDE with a single click.
+					</p>
+
+					<div className="mt-4 flex flex-col gap-3 w-full max-w-sm">
+						<OneClickSwitchButton className="w-full px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs" fromEditor="VS Code" />
+						<OneClickSwitchButton className="w-full px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs" fromEditor="Cursor" />
+						<OneClickSwitchButton className="w-full px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs" fromEditor="Windsurf" />
+					</div>
+
+					<div className="w-full max-w-sm mt-6 flex flex-col items-center gap-3">
+						<button
+							onClick={() => {
+								voidSettingsService.setGlobalSetting('isOnboardingComplete', true);
+								voidMetricsService.capture('Completed Onboarding', {});
+							}}
+							className="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:brightness-110 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 border border-indigo-400/30"
+						>
+							<span>Enter IncogniAI IDE</span>
+							<ChevronRight className="w-4 h-4" />
+						</button>
+
+						<button
+							onClick={() => voidSettingsService.setGlobalSetting('isOnboardingComplete', true)}
+							className="text-xs text-slate-400 hover:text-white underline underline-offset-4 opacity-70 hover:opacity-100 transition-all"
+						>
+							Skip & Launch IDE
+						</button>
 					</div>
 				</div>
 			}
-			bottom={lastPagePrevAndNextButtons}
 		/>,
 	}
 
-
-	return <div key={pageIndex} className="w-full h-[80vh] text-left mx-auto flex flex-col items-center justify-center">
-		<ErrorBoundary>
-			{contentOfIdx[pageIndex]}
-		</ErrorBoundary>
-	</div>
-
+	return (
+		<div key={pageIndex} className="w-full h-[85vh] text-left mx-auto flex flex-col items-center justify-center">
+			<ErrorBoundary>
+				{contentOfIdx[pageIndex]}
+			</ErrorBoundary>
+		</div>
+	)
 }
